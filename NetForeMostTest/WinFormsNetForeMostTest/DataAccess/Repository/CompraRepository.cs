@@ -1,35 +1,31 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using WinFormsNetForeMostTest.DataAccess.Models;
-using WinFormsNetForeMostTest.DataAcess.Utils;
+using System.Data.SqlClient;
 
-namespace WinFormsNetForeMostTest.DataAccess.Repository;
-
-public class CompraRepository
+namespace WinFormsNetForeMostTest.DataAccess.Repository
 {
-    private readonly NetForeMostTestContext _dbContext;
+    public class CompraRepository
+    {
+        private readonly string _connectionString;
 
-    public CompraRepository(NetForeMostTestContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-    public void RegistrarCompra(int productoID, int cantidadComprada, decimal precioUnitario)
-    {
-        // Crear una nueva instancia de Compra
-        Compra nuevaCompra = new Compra
+        public CompraRepository()
         {
-            ProductoID = productoID,
-            CantidadComprada = cantidadComprada,
-            PrecioUnitario = precioUnitario
-        };
+            _connectionString = AppConfig.ConnectionString;
+        }
 
-        // Agregar la nueva compra al DbSet de Compras
-        _dbContext.Compras.Add(nuevaCompra);
-
-        // Guardar los cambios en la base de datos
-        _dbContext.SaveChanges();
+        public void RegistrarCompra(int productoID, int cantidadComprada, decimal precioUnitario)
+        {
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                string query = "INSERT INTO Compras (ProductoID, CantidadComprada, PrecioUnitario, FechaCompra) " +
+                               "VALUES (@ProductoID, @CantidadComprada, @PrecioUnitario, @FechaCompra)";
+                SqlCommand command = new SqlCommand(query, connection);
+                command.Parameters.AddWithValue("@ProductoID", productoID);
+                command.Parameters.AddWithValue("@CantidadComprada", cantidadComprada);
+                command.Parameters.AddWithValue("@PrecioUnitario", precioUnitario);
+                command.Parameters.AddWithValue("@FechaCompra", DateTime.Now);
+                connection.Open();
+                command.ExecuteNonQuery();
+            }
+        }
     }
 }

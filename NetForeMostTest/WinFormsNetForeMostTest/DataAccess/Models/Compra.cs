@@ -10,4 +10,6 @@ public class Compra
 
     public decimal PrecioUnitario { get; set; }
 
+    public DateTime FechaCompra{ get; set; }
+
 }

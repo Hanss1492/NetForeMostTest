@@ -13,21 +13,19 @@ namespace WinFormsNetForeMostTest.BusinessLogic
     {
         private readonly ProductoRepository _productoRepository;
         private readonly CompraRepository _compraRepository;
-        private readonly NetForeMostTestContext _dbContext;
 
-        public CompraManager(NetForeMostTestContext dbContext)
+        public CompraManager()
         {
-            _dbContext = dbContext;
-            _productoRepository = new ProductoRepository(dbContext);
-            _compraRepository = new CompraRepository(dbContext);
+            _productoRepository = new ProductoRepository();
+            _compraRepository = new CompraRepository();
         }
 
-        public void RegistrarCompra(string nombreProducto, int cantidadComprada, decimal precioUnitario)
+        public void RegistrarCompra(int productoId, int cantidadComprada, decimal precioUnitario)
         {
             try
             {
                 // Verificar si el producto existe en la base de datos
-                Producto producto = _productoRepository.ObtenerProductoPorNombre(nombreProducto);
+                Producto producto = _productoRepository.ObtenerProductoPorId(productoId);
 
                 if (producto == null)
                 {

@@ -1,51 +1,43 @@
-﻿using WinFormsNetForeMostTest.DataAccess.Models;
+﻿using System;
+using System.Data.SqlClient;
 using WinFormsNetForeMostTest.DataAcess.Utils;
 
-namespace WinFormsNetForeMostTest.DataAccess.Repository;
-
-public class VentaRepository
+namespace WinFormsNetForeMostTest.DataAccess.Repository
 {
-    private readonly NetForeMostTestContext _dbContext;
+    public class VentaRepository
+    {
+        private readonly string _connectionString;
 
-    public VentaRepository(NetForeMostTestContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-    public void RegistrarVenta(int productoID, int cantidadVendida)
-    {
-        try
+        public VentaRepository()
         {
-            using (var transaction = _dbContext.Database.BeginTransaction())
+            _connectionString = AppConfig.ConnectionString;
+        }
+
+        public void RegistrarVenta(int productoID, int cantidadVendida)
+        {
+            try
             {
-                try
+                using (SqlConnection connection = new SqlConnection(_connectionString))
                 {
-                    // Crear una nueva instancia de Venta
-                    Venta nuevaVenta = new Venta
+                    connection.Open();
+
+                    using (SqlCommand command = connection.CreateCommand())
                     {
-                        ProductoID = productoID,
-                        CantidadVendida = cantidadVendida
-                    };
+                        command.CommandText = "INSERT INTO Ventas (ProductoID, CantidadVendida, FechaVenta) VALUES (@ProductoID, @CantidadVendida, @FechaVenta)";
+                        command.Parameters.AddWithValue("@ProductoID", productoID);
+                        command.Parameters.AddWithValue("@CantidadVendida", cantidadVendida);
+                        command.Parameters.AddWithValue("@FechaVenta", DateTime.Now);
 
-                    // Agregar la nueva venta al DbSet de Ventas
-                    _dbContext.Ventas.Add(nuevaVenta);
-
-                    // Guardar los cambios en la base de datos
-                    _dbContext.SaveChanges();
-
-                    transaction.Commit();
-                }
-                catch (Exception ex)
-                {
-                    transaction.Rollback();
-                    throw new Exception("Error al registrar la venta.", ex);
+                        command.ExecuteNonQuery();
+                    }
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            // Manejar cualquier error y mostrar un mensaje al usuario
-            Console.WriteLine($"Error al registrar la venta: {ex.Message}");
-            throw;
+            catch (Exception ex)
+            {
+                // Manejar cualquier error y mostrar un mensaje al usuario
+                Console.WriteLine($"Error al registrar la venta: {ex.Message}");
+                throw;
+            }
         }
     }
 }

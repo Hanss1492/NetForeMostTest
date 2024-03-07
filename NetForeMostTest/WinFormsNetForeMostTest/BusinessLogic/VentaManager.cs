@@ -1,4 +1,6 @@
-﻿using WinFormsNetForeMostTest.DataAccess.Repository;
+﻿using Microsoft.EntityFrameworkCore;
+using WinFormsNetForeMostTest.DataAccess.Repository;
+using WinFormsNetForeMostTest.DataAcess.Utils;
 
 namespace WinFormsNetForeMostTest.BusinessLogic;
 
@@ -7,17 +9,17 @@ public class VentaManager
     private readonly ProductoRepository _productoRepository;
     private readonly VentaRepository _ventaRepository;
 
-    public VentaManager(ProductoRepository productoRepository, VentaRepository ventaRepository)
+    public VentaManager()
     {
-        _productoRepository = productoRepository;
-        _ventaRepository = ventaRepository;
+        _productoRepository = new ProductoRepository();
+        _ventaRepository = new VentaRepository();
     }
-    public void RegistrarVenta(string nombreProducto, int cantidadVendida)
+    public void RegistrarVenta(int productoID, int cantidadVendida)
     {
         try
         {
             // Verificar si el producto existe en el inventario
-            var producto = _productoRepository.ObtenerProductoPorNombre(nombreProducto);
+            var producto = _productoRepository.ObtenerProductoPorId(productoID);
 
             if (producto == null)
             {
